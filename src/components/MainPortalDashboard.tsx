@@ -17,6 +17,8 @@ interface MainPortalDashboardProps {
   onSelectRole: (role: UserRoleType) => void;
   onOpenLodgeModal: () => void;
   onOpenDirectoryModal: () => void;
+  /** Optional slot rendered between the hero and the national map (e.g. quick actions). */
+  quickActions?: React.ReactNode;
 }
 
 export const MainPortalDashboard: React.FC<MainPortalDashboardProps> = ({
@@ -24,6 +26,7 @@ export const MainPortalDashboard: React.FC<MainPortalDashboardProps> = ({
   complaints,
   onSelectRole,
   onOpenLodgeModal,
+  quickActions,
 }) => {
   const { t } = useLanguage();
 
@@ -90,8 +93,10 @@ export const MainPortalDashboard: React.FC<MainPortalDashboardProps> = ({
         </div>
       </div>
 
+      {quickActions}
+
       {/* PRIMARY MAP: ALL-INDIA NATIONAL WATER GRID */}
-      <div className="space-y-3">
+      <div id="national-map" className="space-y-3 scroll-mt-32">
         <div className="flex flex-wrap items-center justify-between gap-3 px-1">
           <div>
             <h3 className="font-extrabold text-slate-900 text-lg sm:text-xl flex items-center gap-2">

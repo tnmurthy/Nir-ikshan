@@ -2,6 +2,30 @@ export type Language = 'en' | 'hi' | 'te';
 
 export const TRANSLATIONS: Record<Language, Record<string, string>> = {
   en: {
+    // Routing & navigation (feat/routing-ia)
+    navHome: "Home",
+    navReport: "Report an issue",
+    navTrack: "Track complaint",
+    navMyComplaints: "My complaints",
+    navOfficers: "Officer directory",
+    navConsole: "Officer console",
+    ctaReportTitle: "Report a water body issue",
+    ctaReportDesc: "Dumping, effluent, encroachment or siltation — with photo and location.",
+    ctaTrackTitle: "Track your complaint",
+    ctaTrackDesc: "Enter your complaint ID to see who is handling it and its current stage.",
+    ctaExploreTitle: "Explore water data",
+    ctaExploreDesc: "Reservoirs, rainfall, groundwater and satellite water-body status by district.",
+    trackIntro: "Enter the complaint ID you received after submitting.",
+    trackButton: "Track",
+    trackMine: "Your recent complaints",
+    consoleTitle: "Choose your workspace",
+    consoleSignIn: "Sign in",
+    consoleSignInHint: "Sign in with your registered mobile number to open your workspace.",
+    wsAdmin: "State admin",
+    wsNodal: "Nodal",
+    wsInspector: "Inspector",
+    wsEngineer: "Engineer",
+    footerDataNote: "Hydrology data: India-WRIS, CWC, IMD, CGWB, APWRIMS and ISRO Bhuvan. Figures marked \"baseline\" are reference values, not live readings.",
     // Header & Branding (Pure English - no brackets or other language)
     siteTitle: 'Nir-ikshan',
     siteSubtitle: 'National Micro-Watershed Grid',
@@ -172,7 +196,6 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     footerTitle: 'Nir-ikshan — National & Andhra Pradesh Water Surveillance',
     footerSubtitle: 'All India Water Grid • Vizianagaram & Parvathipuram Manyam Circles • Water Resources Dept.',
     footerPortalsList: 'National Grid Portals: Overview • Normal User • State Admin • Vizianagaram Nodal • Parvathipuram Nodal • Field Inspector • Action Worker',
-    footerStaffCredentials: 'Staff Credentials: admin@nir.com / 1234',
 
     // General terms
     close: 'Close',
@@ -182,6 +205,30 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
   },
 
   hi: {
+    // Routing & navigation (feat/routing-ia)
+    navHome: "होम",
+    navReport: "शिकायत दर्ज करें",
+    navTrack: "शिकायत ट्रैक करें",
+    navMyComplaints: "मेरी शिकायतें",
+    navOfficers: "अधिकारी निर्देशिका",
+    navConsole: "अधिकारी कंसोल",
+    ctaReportTitle: "जल स्रोत की समस्या दर्ज करें",
+    ctaReportDesc: "कचरा, अपशिष्ट जल, अतिक्रमण या गाद — फोटो और स्थान के साथ।",
+    ctaTrackTitle: "अपनी शिकायत ट्रैक करें",
+    ctaTrackDesc: "शिकायत आईडी दर्ज करें और देखें कि कौन इसे संभाल रहा है।",
+    ctaExploreTitle: "जल डेटा देखें",
+    ctaExploreDesc: "जिलेवार जलाशय, वर्षा, भूजल और उपग्रह जल-स्रोत स्थिति।",
+    trackIntro: "शिकायत दर्ज करने के बाद मिली आईडी दर्ज करें।",
+    trackButton: "ट्रैक करें",
+    trackMine: "आपकी हाल की शिकायतें",
+    consoleTitle: "अपना कार्यक्षेत्र चुनें",
+    consoleSignIn: "साइन इन करें",
+    consoleSignInHint: "अपना कार्यक्षेत्र खोलने के लिए पंजीकृत मोबाइल नंबर से साइन इन करें।",
+    wsAdmin: "राज्य प्रशासक",
+    wsNodal: "नोडल",
+    wsInspector: "निरीक्षक",
+    wsEngineer: "इंजीनियर",
+    footerDataNote: "जल डेटा: India-WRIS, CWC, IMD, CGWB, APWRIMS और ISRO भुवन। \"बेसलाइन\" चिह्नित आंकड़े संदर्भ मान हैं, लाइव रीडिंग नहीं।",
     // Header & Branding (Pure Hindi - no brackets or other language)
     siteTitle: 'नीर-ईक्षण',
     siteSubtitle: 'राष्ट्रीय सूक्ष्म-जलग्रहण ग्रिड',
@@ -352,7 +399,6 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     footerTitle: 'नीर-ईक्षण — राष्ट्रीय एवं आंध्र प्रदेश जल निगरानी',
     footerSubtitle: 'अखिल भारतीय जल ग्रिड • विजयनगरम व पार्वतीपुरम मान्यम सर्कल • जल संसाधन विभाग',
     footerPortalsList: 'राष्ट्रीय ग्रिड पोर्टल: ओवरव्यू • सामान्य नागरिक • राज्य प्रशासक • विजयनगरम नोडल • पार्वतीपुरम नोडल • फील्ड इंस्पेक्टर • एक्शन वर्कर',
-    footerStaffCredentials: 'कर्मचारी क्रेडेंशियल: admin@nir.com / 1234',
 
     // General terms
     close: 'बंद करें',
@@ -362,6 +408,30 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
   },
 
   te: {
+    // Routing & navigation (feat/routing-ia)
+    navHome: "హోమ్",
+    navReport: "ఫిర్యాదు చేయండి",
+    navTrack: "ఫిర్యాదు ట్రాక్ చేయండి",
+    navMyComplaints: "నా ఫిర్యాదులు",
+    navOfficers: "అధికారుల డైరెక్టరీ",
+    navConsole: "అధికారుల కన్సోల్",
+    ctaReportTitle: "నీటి వనరు సమస్యను నివేదించండి",
+    ctaReportDesc: "చెత్త, వ్యర్థ జలాలు, ఆక్రమణ లేదా పూడిక — ఫోటో మరియు స్థానంతో.",
+    ctaTrackTitle: "మీ ఫిర్యాదును ట్రాక్ చేయండి",
+    ctaTrackDesc: "ఫిర్యాదు ID నమోదు చేసి ఎవరు చూస్తున్నారో తెలుసుకోండి.",
+    ctaExploreTitle: "నీటి డేటాను చూడండి",
+    ctaExploreDesc: "జిల్లాల వారీగా జలాశయాలు, వర్షపాతం, భూగర్భ జలం మరియు ఉపగ్రహ స్థితి.",
+    trackIntro: "ఫిర్యాదు చేసిన తర్వాత వచ్చిన IDని నమోదు చేయండి.",
+    trackButton: "ట్రాక్",
+    trackMine: "మీ ఇటీవలి ఫిర్యాదులు",
+    consoleTitle: "మీ కార్యక్షేత్రాన్ని ఎంచుకోండి",
+    consoleSignIn: "సైన్ ఇన్",
+    consoleSignInHint: "మీ కార్యక్షేత్రాన్ని తెరవడానికి నమోదిత మొబైల్ నంబర్‌తో సైన్ ఇన్ చేయండి.",
+    wsAdmin: "రాష్ట్ర నిర్వాహకులు",
+    wsNodal: "నోడల్",
+    wsInspector: "తనిఖీ అధికారి",
+    wsEngineer: "ఇంజనీర్",
+    footerDataNote: "నీటి డేటా: India-WRIS, CWC, IMD, CGWB, APWRIMS మరియు ISRO భువన్. \"బేస్‌లైన్\" అని గుర్తించిన సంఖ్యలు సూచన విలువలు, ప్రత్యక్ష రీడింగ్‌లు కావు.",
     // Header & Branding (Pure Telugu - no brackets or other language)
     siteTitle: 'నీర్-ఈక్షణ్',
     siteSubtitle: 'జాతీయ మైక్రో-వాటర్‌షెడ్ గ్రిడ్',
@@ -532,7 +602,6 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     footerTitle: 'నీర్-ఈక్షణ్ — జాతీయ & ఆంధ్రప్రదేశ్ జల పర్యవేక్షణ',
     footerSubtitle: 'అఖిల భారత జల గ్రిడ్ • విజయనగరం & పార్వతీపురం మన్యం సర్కిల్స్ • జల వనరుల శాఖ',
     footerPortalsList: 'జాతీయ గ్రిడ్ పోర్టల్స్: అవలోకనం • సాధారణ పౌరుడు • రాష్ట్ర అడ్మిన్ • విజయనగరం నోడల్ • పార్వతీపురం నోడల్ • ఫీల్డ్ ఇన్స్పెక్టర్ • యాక్షన్ వర్కర్',
-    footerStaffCredentials: 'సిబ్బంది ఆధారాలు: admin@nir.com / 1234',
 
     // General terms
     close: 'మూసివేయి',

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router';
 import { WaterBody, CitizenComplaint, OfficerContact } from '../types/nirikshan';
 import { ANDHRA_PRADESH_26_DISTRICTS, DistrictTelemetry } from '../data/andhraDistrictsData';
 import { AP_OFFICIAL_RESERVOIRS, APReservoirRecord } from '../data/apReservoirsData';
@@ -91,6 +92,11 @@ export type AdminActiveTab =
   | 'reports' 
   | 'audit_log'
   | 'settings';
+
+export const ADMIN_TABS = [
+  'overview', 'map', 'districts', 'assets', 'issues_and_tasks', 'users_and_roles',
+  'jurisdictions', 'rules_and_deadlines', 'reports', 'audit_log', 'settings',
+] as const satisfies readonly AdminActiveTab[];
 
 export interface HydrologicalJurisdiction {
   id: string;
@@ -523,10 +529,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const uiText = STATE_ADMIN_UI_TEXT[currentLang];
 
   // Active State Admin View: 'hub' for Flashcards Hub (image_ea6905dc.png) or specific module ID
-  const [activePage, setActivePage] = useState<'hub' | AdminActiveTab>('hub');
-  const activeTab = activePage;
+  // Active module lives in the URL (?tab=districts) so it survives refresh, Back works and links can be shared
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get('tab') as AdminActiveTab | null;
+  const activeTab: 'hub' | AdminActiveTab =
+    requestedTab && (ADMIN_TABS as readonly string[]).includes(requestedTab) ? requestedTab : 'hub';
   const setActiveTab = (tab: AdminActiveTab | 'hub') => {
-    setActivePage(tab);
+    setSearchParams(tab === 'hub' ? {} : { tab });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -1369,7 +1378,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* 1. HERO HEADER: STATE WATER SURVEILLANCE & EXECUTIVE OVERSIGHT       */}
       {/* (SHOWN ONLY ON HUB VIEW SO SUB-PAGES ARE CLEAN AND SPACIOUS)         */}
       {/* ==================================================================== */}
-      {activePage === 'hub' && (
+      {activeTab === 'hub' && (
         <div className="bg-[#f0f7fb] border border-sky-100/90 rounded-3xl p-6 sm:p-7 shadow-2xs space-y-6">
           {/* Text Block */}
           <div className="space-y-2 w-full">
@@ -1478,9 +1487,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {/* ==================================================================== */}
       {/* 2. FLASHCARDS HUB (UNIFIED GOVERNANCE & ADMINISTRATIVE INFRASTRUCTURE) */}
-      {/* When activePage === 'hub', show all 11 modules under unified command   */}
+      {/* When activeTab === 'hub', show all 11 modules under unified command   */}
       {/* ==================================================================== */}
-      {activePage === 'hub' && (
+      {activeTab === 'hub' && (
         <div className="space-y-6 animate-in fade-in duration-200">
           {/* UNIFIED GOVERNANCE & ADMINISTRATIVE INFRASTRUCTURE HEADER */}
           <div className="space-y-4">
@@ -1670,7 +1679,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* ==================================================================== */}
       {/* 3. DEDICATED MODULE PAGE VIEW (WHEN ANY FLASHCARD IS OPENED)         */}
       {/* ==================================================================== */}
-      {activePage !== 'hub' && (
+      {activeTab !== 'hub' && (
         <div className="space-y-5 animate-in fade-in duration-150">
           {/* Top Navigation Bar: Back to Hub + Module Header + Language Switcher + Jump-to Dropdown */}
           <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-4 shadow-2xs flex flex-wrap items-center justify-between gap-3">
@@ -1684,7 +1693,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <span>{uiText.backToHub}</span>
               </button>
 
-              {activePage === 'map' && (
+              {activeTab === 'map' && (
                 <button
                   onClick={() => setActiveTab('districts')}
                   className="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-2xs"
@@ -1742,7 +1751,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div className="flex items-center gap-2">
                 <label className="text-[11px] font-bold text-slate-500 hidden md:inline">{uiText.jumpToLabel}</label>
                 <select
-                  value={activePage}
+                  value={activeTab}
                   onChange={(e) => setActiveTab(e.target.value as AdminActiveTab | 'hub')}
                   className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 cursor-pointer shadow-2xs hover:bg-slate-100"
                 >
