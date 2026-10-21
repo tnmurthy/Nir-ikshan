@@ -2,9 +2,7 @@
  * ISRO Bhuvan API Gateway & Connection Tester
  * 
  * Supports:
- * - Environment variables: BHUVAN_API_TOKEN, VITE_BHUVAN_API_TOKEN
- * - Request headers: x-bhuvan-token, authorization
- * - Query parameter: ?token=...
+ * - Environment variable: BHUVAN_API_TOKEN (server-side only)
  * 
  * Themes supported from Bhuvan:
  * - LULC Statistics & Water Bodies Cover
@@ -13,21 +11,17 @@
 
 export default async function handler(req, res) {
   // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-bhuvan-token, authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
   // Detect token from environment (Vercel or local) or incoming request
-  const token = 
-    process.env.BHUVAN_API_TOKEN || 
-    process.env.VITE_BHUVAN_API_TOKEN || 
-    req.headers['x-bhuvan-token'] || 
-    req.query.token || 
-    '';
+  // Server-side secret only. Never read VITE_* (bundled into the browser) or tokens from the request.
+  const token = process.env.BHUVAN_API_TOKEN || '';
 
   const action = req.query.action || 'test';
   const district = req.query.district || 'Vizianagaram';
@@ -38,11 +32,11 @@ export default async function handler(req, res) {
       return res.status(200).json({
         status: 'token_missing',
         hasToken: false,
-        message: 'No Bhuvan token detected in environment. Add VITE_BHUVAN_API_TOKEN in Vercel.',
+        message: 'No Bhuvan token configured. Add BHUVAN_API_TOKEN (server-side) in Vercel.',
         docsUrl: 'https://bhuvan-app1.nrsc.gov.in/api/',
         instructions: [
           'Go to Vercel Project Settings > Environment Variables',
-          'Add Key: VITE_BHUVAN_API_TOKEN or BHUVAN_API_TOKEN',
+          'Add Key: BHUVAN_API_TOKEN',
           'Paste your ISRO Bhuvan Access Token and Redeploy'
         ]
       });
@@ -97,6 +91,7 @@ export default async function handler(req, res) {
   if (action === 'lulc' || action === 'water_bodies' || action === 'wbis') {
     return res.status(200).json({
       status: 'success',
+      dataQuality: 'baseline', // static reference figures, not a live Bhuvan query
       theme: 'Bhuvan Water Bodies Information System (WBIS)',
       district: district,
       hasToken: Boolean(token),

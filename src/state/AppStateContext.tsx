@@ -3,7 +3,7 @@
  * and the complaint workflow handlers. Moved out of App.tsx so that every route
  * reads the same state without prop-drilling through a role switch.
  */
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
   WaterBody,
   CitizenComplaint,
@@ -17,11 +17,18 @@ import {
   SAMPLE_CITIZEN_COMPLAINTS,
 } from '../data/nirikshanData';
 import {
-  isSupabaseConfigured,
-  fetchComplaintsFromSupabase,
-  saveComplaintToSupabase,
+  supabase,
+  isDemoMode,
+  fetchComplaints,
+  createComplaint,
+  updateComplaintWorkflow,
   subscribeToComplaints,
+  mergeKeepingPii,
 } from '../lib/supabase';
+import { ensureCitizenSession, officialFromSession, OfficialSession, signOutEverywhere } from '../lib/auth';
+
+/** Evaluated once at startup. */
+export const DEMO = isDemoMode();
 
 export interface CitizenSession {
   name: string;
@@ -35,6 +42,14 @@ interface AppState {
   currentUser: CitizenSession | null;
   isLoggedIn: boolean;
   lastSubmittedId: string | null;
+  /** true when running without Supabase (local-only data, simulated OTP) */
+  isDemo: boolean;
+  /** signed-in officer (cloud mode only) */
+  official: OfficialSession | null;
+  authReady: boolean;
+  /** last cloud write error, shown to the user */
+  syncError: string | null;
+  clearSyncError: () => void;
 
   // global overlays
   isOtpModalOpen: boolean;
@@ -47,9 +62,10 @@ interface AppState {
   // session
   login: (user: CitizenSession) => void;
   logout: () => void;
+  signOutOfficial: () => Promise<void>;
 
   // workflow
-  submitComplaint: (c: CitizenComplaint) => void;
+  submitComplaint: (c: CitizenComplaint) => Promise<CitizenComplaint | null>;
   assignInspector: (id: string, name: string, phone: string) => void;
   submitInspectionReport: (id: string, report: InspectorReport) => void;
   assignEngineer: (id: string, name: string, phone: string, deadline: string) => void;
@@ -79,6 +95,8 @@ const dedupe = (list: CitizenComplaint[]) => {
 };
 
 const loadInitialComplaints = (): CitizenComplaint[] => {
+  // Cloud mode never shows sample data and never caches complaints (with PII) in the browser
+  if (DEMO === false) return [];
   const saved = readJson<CitizenComplaint[]>('nir_complaints', []);
   if (!Array.isArray(saved) || saved.length === 0) return SAMPLE_CITIZEN_COMPLAINTS;
   const map = new Map<string, CitizenComplaint>();
@@ -97,9 +115,16 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [lastSubmittedId, setLastSubmittedId] = useState<string | null>(null);
   const [isOtpModalOpen, setOtpOpen] = useState(false);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
+  // Synchronous view of the latest list, so handlers can decide before queuing state updates
+  const complaintsRef = useRef(complaints);
+  complaintsRef.current = complaints;
+  const [official, setOfficial] = useState<OfficialSession | null>(null);
+  const [authReady, setAuthReady] = useState(DEMO);
+  const [syncError, setSyncError] = useState<string | null>(null);
 
   // Persist the local cache in one place instead of inside every handler
   useEffect(() => {
+    if (!DEMO) return;
     try {
       localStorage.setItem('nir_complaints', JSON.stringify(complaints));
     } catch {
@@ -116,46 +141,70 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [waterBodies]);
 
   const refreshFromCloud = useCallback(() => {
-    if (!isSupabaseConfigured()) return;
-    fetchComplaintsFromSupabase().then((remote) => {
-      if (remote && remote.length > 0) setComplaints(dedupe(remote));
+    if (DEMO) return;
+    fetchComplaints().then((remote) => {
+      if (remote) setComplaints(dedupe(remote));
     });
   }, []);
 
-  // Supabase initial load + realtime subscription
+  // Auth state (cloud mode): officer session drives console access; any session unlocks own PII
   useEffect(() => {
-    if (!isSupabaseConfigured()) return;
+    if (DEMO || !supabase) return;
+    supabase.auth.getSession().then(({ data }) => {
+      setOfficial(officialFromSession(data.session));
+      setAuthReady(true);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setOfficial(officialFromSession(session));
+      refreshFromCloud();
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [refreshFromCloud]);
+
+  // Initial load + realtime (public columns only; keep PII we already hold)
+  useEffect(() => {
+    if (DEMO) return;
     refreshFromCloud();
     const unsubscribe = subscribeToComplaints(
       (inserted) => setComplaints((prev) => (prev.some((c) => c.id === inserted.id) ? prev : [inserted, ...prev])),
-      (updated) => setComplaints((prev) => prev.map((c) => (c.id === updated.id ? updated : c)))
+      (updated) => setComplaints((prev) => prev.map((c) => (c.id === updated.id ? mergeKeepingPii(c, updated) : c)))
     );
     return () => unsubscribe();
   }, [refreshFromCloud]);
 
-  /** Apply an update to one complaint and persist it to Supabase. */
-  const mutate = useCallback((id: string, fn: (c: CitizenComplaint) => CitizenComplaint | null) => {
-    setComplaints((prev) => {
-      let changed: CitizenComplaint | null = null;
-      const next = prev.map((c) => {
-        if (c.id !== id) return c;
-        const updated = fn(c);
-        if (!updated) return c;
-        changed = updated;
-        return updated;
+  /**
+   * Apply an update to one complaint. Optimistic in the UI; in cloud mode the write goes through
+   * RLS + the status-transition trigger, and on rejection we reload the server copy.
+   */
+  const mutate = useCallback(
+    (id: string, fn: (c: CitizenComplaint) => CitizenComplaint | null) => {
+      const current = complaintsRef.current.find((c) => c.id === id);
+      if (!current) return;
+      const updated = fn(current);
+      if (!updated) return;
+      complaintsRef.current = complaintsRef.current.map((c) => (c.id === id ? updated : c));
+      setComplaints((prev) => prev.map((c) => (c.id === id ? updated : c)));
+      if (DEMO) return;
+      updateComplaintWorkflow(updated).catch((err: Error) => {
+        setSyncError(`Update not saved: ${err.message}`);
+        refreshFromCloud();
       });
-      if (changed) saveComplaintToSupabase(changed);
-      return next;
-    });
-  }, []);
+    },
+    [refreshFromCloud]
+  );
 
   const value: AppState = {
     waterBodies,
     complaints,
     officers,
     currentUser,
-    isLoggedIn: Boolean(currentUser),
+    isLoggedIn: Boolean(currentUser) || Boolean(official),
     lastSubmittedId,
+    isDemo: DEMO,
+    official,
+    authReady,
+    syncError,
+    clearSyncError: () => setSyncError(null),
 
     isOtpModalOpen,
     openOtpModal: () => setOtpOpen(true),
@@ -171,6 +220,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       } catch {
         /* ignore */
       }
+      if (!DEMO) ensureCitizenSession().catch((e: Error) => setSyncError(e.message));
     },
     logout: () => {
       setCurrentUser(null);
@@ -179,23 +229,41 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       } catch {
         /* ignore */
       }
+      if (!DEMO) signOutEverywhere();
+    },
+    signOutOfficial: async () => {
+      await signOutEverywhere();
+      setOfficial(null);
     },
 
-    submitComplaint: (nc) => {
-      setComplaints((prev) => {
-        if (prev.some((c) => c.id === nc.id)) return prev;
-        const isRapidDuplicate = prev.some((c) => {
+    submitComplaint: async (nc) => {
+      const prev = complaintsRef.current;
+      const isDuplicate =
+        prev.some((c) => c.id === nc.id) ||
+        prev.some((c) => {
           const sameUser = c.citizenPhone === nc.citizenPhone;
           const sameDesc = c.shortDescription?.trim().toLowerCase() === nc.shortDescription?.trim().toLowerCase();
           const sameLandmark = c.locationLandmark?.trim().toLowerCase() === nc.locationLandmark?.trim().toLowerCase();
           const diff = Math.abs(new Date(c.submittedAt).getTime() - new Date(nc.submittedAt).getTime());
           return sameUser && (sameDesc || sameLandmark) && (isNaN(diff) || diff < 120000);
         });
-        if (isRapidDuplicate) return prev;
-        saveComplaintToSupabase(nc);
-        return [nc, ...prev];
-      });
+      if (!isDuplicate) {
+        complaintsRef.current = [nc, ...prev];
+        setComplaints((list) => [nc, ...list]);
+      }
+      if (isDuplicate) return null;
       setLastSubmittedId(nc.id);
+      if (DEMO) return nc;
+      try {
+        await ensureCitizenSession();
+        const saved = await createComplaint(nc);
+        setComplaints((prev) => prev.map((c) => (c.id === saved.id ? saved : c)));
+        return saved;
+      } catch (err) {
+        setComplaints((prev) => prev.filter((c) => c.id !== nc.id));
+        setSyncError((err as Error).message);
+        return null;
+      }
     },
 
     assignInspector: (id, name, phone) =>

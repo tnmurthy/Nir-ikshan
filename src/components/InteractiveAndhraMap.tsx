@@ -254,10 +254,9 @@ export const InteractiveAndhraMap: React.FC<InteractiveAndhraMapProps> = ({
     setIsTestingBhuvan(true);
     setBhuvanTestResult(null);
     try {
-      const tokenToTest = overrideToken !== undefined ? overrideToken : testTokenInput;
-      const url = tokenToTest 
-        ? `/api/bhuvan?action=test&token=${encodeURIComponent(tokenToTest.trim())}`
-        : `/api/bhuvan?action=test`;
+      // The token is a server-side secret (BHUVAN_API_TOKEN); never send it from the browser.
+      void overrideToken;
+      const url = `/api/bhuvan?action=test`;
       const res = await fetch(url);
       const data = await res.json();
       setBhuvanTestResult(data);
@@ -1778,7 +1777,7 @@ export const InteractiveAndhraMap: React.FC<InteractiveAndhraMapProps> = ({
             <div className="bg-slate-900/90 p-3 rounded-lg border border-slate-800 space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="text-slate-400 text-[11px] uppercase tracking-wider font-bold">Vercel Environment Variable:</span>
-                <span className="text-[10px] text-slate-400">Key: <code className="text-sky-400 font-bold">VITE_BHUVAN_API_TOKEN</code></span>
+                <span className="text-[10px] text-slate-400">Key: <code className="text-sky-400 font-bold">BHUVAN_API_TOKEN</code></span>
               </div>
               <div className="flex items-center gap-2 text-xs">
                 {bhuvanTestResult?.hasToken ? (
@@ -1834,7 +1833,7 @@ export const InteractiveAndhraMap: React.FC<InteractiveAndhraMapProps> = ({
 
             {/* Instructions */}
             <div className="text-[11px] text-slate-400 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 leading-relaxed font-sans">
-              <strong className="text-indigo-300 font-mono">Kaise Save Karein:</strong> Vercel Dashboard ➡️ Settings ➡️ Environment Variables ➡️ Key: <code className="text-sky-300 font-mono">VITE_BHUVAN_API_TOKEN</code> (Value: aapka token) ➡️ Save & Redeploy.
+              <strong className="text-indigo-300 font-mono">Kaise Save Karein:</strong> Vercel Dashboard ➡️ Settings ➡️ Environment Variables ➡️ Key: <code className="text-sky-300 font-mono">BHUVAN_API_TOKEN</code> (Value: aapka token) ➡️ Save & Redeploy.
             </div>
           </div>
         )}

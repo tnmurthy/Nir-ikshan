@@ -35,7 +35,7 @@ export const NirikshanHeader: React.FC<NirikshanHeaderProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-[#03045E]">
+              <h1 className="text-base sm:text-xl font-extrabold tracking-tight text-[#03045E] whitespace-nowrap">
                 {t('siteTitle')}
               </h1>
               <span className="text-[10px] font-bold uppercase tracking-wider bg-[#CAF0F8] text-[#03045E] px-2.5 py-0.5 rounded-full border border-[#00B4D8]/30 hidden sm:inline">
@@ -49,10 +49,20 @@ export const NirikshanHeader: React.FC<NirikshanHeaderProps> = ({
         </div>
 
         {/* Right Section: Language Toggle & Login / Hamburger Button (Images 3 & 4) */}
-        <div className="flex items-center gap-2.5 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           
           {/* Language Selector (Pure English | Pure Hindi | Pure Telugu) */}
-          <div className="flex items-center bg-[#03045E]/10 border border-[#03045E]/20 p-0.5 rounded-xl text-xs font-bold text-slate-700 shadow-2xs">
+          <select
+            aria-label="Language"
+            value={language}
+            onChange={(e) => setLanguage(e.target.value as 'en' | 'hi' | 'te')}
+            className="sm:hidden h-9 px-1.5 rounded-xl border border-[#03045E]/20 bg-white text-xs font-bold text-[#03045E]"
+          >
+            <option value="en">EN</option>
+            <option value="hi">हिं</option>
+            <option value="te">తె</option>
+          </select>
+          <div className="hidden sm:flex items-center bg-[#03045E]/10 border border-[#03045E]/20 p-0.5 rounded-xl text-xs font-bold text-slate-700 shadow-2xs">
             <button
               onClick={() => setLanguage('en')}
               className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
@@ -101,7 +111,7 @@ export const NirikshanHeader: React.FC<NirikshanHeaderProps> = ({
                 className="flex items-center gap-2 bg-[#0077B6] hover:bg-[#03045E] text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-sm transition-all active:scale-95 cursor-pointer"
               >
                 <LogIn className="w-4 h-4 text-[#CAF0F8]" />
-                <span>{t('login')}</span>
+                <span className="hidden sm:inline">{t('login')}</span>
               </button>
 
               {currentRole === 'admin' ? (

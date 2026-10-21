@@ -81,6 +81,8 @@ export type UserRoleType = 'overview' | 'admin' | 'user' | 'nodal_vizianagaram' 
 
 export interface CitizenComplaint {
   id: string; // e.g. "CMP-AP-2026-101"
+  /** Supabase auth uid of the reporter (cloud mode only). */
+  reporterUid?: string;
   citizenName: string;
   citizenAge: number;
   citizenGender: 'Male' | 'Female' | 'Other';

@@ -2,6 +2,19 @@ export type Language = 'en' | 'hi' | 'te';
 
 export const TRANSLATIONS: Record<Language, Record<string, string>> = {
   en: {
+    // Auth & security (feat/routing-ia)
+    demoBanner: "Demo mode: sample data, simulated sign-in. Complaints are saved only in this browser.",
+    officerEmailHint: "Enter your registered official email. We will send a 6-digit sign-in code.",
+    officerCodeHint: "Enter the code sent to your email.",
+    officerSendCode: "Send code",
+    officerChangeEmail: "Use a different email",
+    signOut: "Sign out",
+    citizenSignInTitle: "Your contact details",
+    citizenSignInHint: "Officers use these only to contact you about your complaint. They are never shown publicly.",
+    fullName: "Full name",
+    mobileNumber: "Mobile number",
+    continue: "Continue",
+    reportSignInHint: "Add your name and mobile number so the district officer can reach you.",
     // Routing & navigation (feat/routing-ia)
     navHome: "Home",
     navReport: "Report an issue",
@@ -205,6 +218,19 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
   },
 
   hi: {
+    // Auth & security (feat/routing-ia)
+    demoBanner: "डेमो मोड: नमूना डेटा, सिम्युलेटेड साइन-इन। शिकायतें केवल इसी ब्राउज़र में सहेजी जाती हैं।",
+    officerEmailHint: "अपना पंजीकृत आधिकारिक ईमेल दर्ज करें। हम 6 अंकों का कोड भेजेंगे।",
+    officerCodeHint: "ईमेल पर भेजा गया कोड दर्ज करें।",
+    officerSendCode: "कोड भेजें",
+    officerChangeEmail: "दूसरा ईमेल उपयोग करें",
+    signOut: "साइन आउट",
+    citizenSignInTitle: "आपका संपर्क विवरण",
+    citizenSignInHint: "अधिकारी इनका उपयोग केवल आपकी शिकायत के बारे में संपर्क के लिए करते हैं। ये कभी सार्वजनिक नहीं होते।",
+    fullName: "पूरा नाम",
+    mobileNumber: "मोबाइल नंबर",
+    continue: "आगे बढ़ें",
+    reportSignInHint: "अपना नाम और मोबाइल नंबर जोड़ें ताकि जिला अधिकारी आपसे संपर्क कर सकें।",
     // Routing & navigation (feat/routing-ia)
     navHome: "होम",
     navReport: "शिकायत दर्ज करें",
@@ -408,6 +434,19 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
   },
 
   te: {
+    // Auth & security (feat/routing-ia)
+    demoBanner: "డెమో మోడ్: నమూనా డేటా, అనుకరణ సైన్-ఇన్. ఫిర్యాదులు ఈ బ్రౌజర్‌లో మాత్రమే సేవ్ అవుతాయి.",
+    officerEmailHint: "మీ నమోదిత అధికారిక ఇమెయిల్ నమోదు చేయండి. 6 అంకెల కోడ్ పంపుతాము.",
+    officerCodeHint: "ఇమెయిల్‌కు వచ్చిన కోడ్ నమోదు చేయండి.",
+    officerSendCode: "కోడ్ పంపండి",
+    officerChangeEmail: "వేరే ఇమెయిల్ ఉపయోగించండి",
+    signOut: "సైన్ అవుట్",
+    citizenSignInTitle: "మీ సంప్రదింపు వివరాలు",
+    citizenSignInHint: "అధికారులు వీటిని మీ ఫిర్యాదు గురించి సంప్రదించడానికి మాత్రమే ఉపయోగిస్తారు. ఇవి ఎప్పుడూ బహిరంగంగా చూపబడవు.",
+    fullName: "పూర్తి పేరు",
+    mobileNumber: "మొబైల్ నంబర్",
+    continue: "కొనసాగించండి",
+    reportSignInHint: "జిల్లా అధికారి మిమ్మల్ని సంప్రదించేందుకు మీ పేరు మరియు మొబైల్ నంబర్ జోడించండి.",
     // Routing & navigation (feat/routing-ia)
     navHome: "హోమ్",
     navReport: "ఫిర్యాదు చేయండి",

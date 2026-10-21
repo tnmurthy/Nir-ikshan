@@ -17,7 +17,7 @@ https://nir-ikshan.vercel.app/
 
 Code map: `src/routes.tsx` (all routes) · `src/layouts/AppShell.tsx` (header, nav, footer) · `src/state/AppStateContext.tsx` (complaints + workflow) · `src/navigation/paths.ts` (URL helpers) · `src/pages/*` (route pages).
 
-> The console sign-in still uses the demo OTP session. Replace with Supabase Auth before a real pilot.
+> Without Supabase env vars the app runs in demo mode (sample data, simulated sign-in). For a real pilot follow [docs/SECURITY_SETUP.md](docs/SECURITY_SETUP.md).
 
 ```powershell
 npm ci

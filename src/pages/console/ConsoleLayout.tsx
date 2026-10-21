@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router';
-import { ShieldCheck, LogIn, Globe } from 'lucide-react';
+import { ShieldCheck, LogIn, Globe, LogOut } from 'lucide-react';
+import { OfficerSignIn } from '../../components/OfficerSignIn';
+import { canOpen } from './access';
 import { useAppState } from '../../state/AppStateContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { NODAL_DISTRICTS, PATHS } from '../../navigation/paths';
@@ -12,15 +14,21 @@ const tab = ({ isActive }: { isActive: boolean }) =>
 
 /**
  * Officer console frame: sign-in gate, breadcrumb and workspace tabs.
- * NOTE: the gate uses the existing demo OTP session. Replace with Supabase Auth
- * (role in app_metadata) before any real pilot — see review item #3/#4.
+ * Cloud mode: Supabase email-code sign-in; tabs limited to the officer's role/district
+ * (the database enforces the same rules through RLS).
+ * Demo mode: simulated OTP session, all workspaces visible.
  */
 export default function ConsoleLayout() {
-  const { isLoggedIn, openOtpModal } = useAppState();
+  const { isLoggedIn, openOtpModal, isDemo, official, authReady, signOutOfficial } = useAppState();
   const { t } = useLanguage();
   const { pathname } = useLocation();
 
-  if (!isLoggedIn) {
+  if (!isDemo) {
+    if (!authReady) return null;
+    if (!official) return <OfficerSignIn />;
+  }
+
+  if (isDemo && !isLoggedIn) {
     return (
       <div className="max-w-md mx-auto bg-white border border-slate-200 rounded-3xl p-6 text-center space-y-4 shadow-2xs">
         <div className="w-12 h-12 mx-auto rounded-2xl bg-[#CAF0F8] flex items-center justify-center">
@@ -55,14 +63,20 @@ export default function ConsoleLayout() {
           </Link>
         </nav>
         <nav aria-label="Workspaces" className="flex items-center gap-1 overflow-x-auto">
-          <NavLink to={PATHS.admin} className={tab}>{t('wsAdmin', 'State admin')}</NavLink>
-          {NODAL_DISTRICTS.map((d) => (
+          {canOpen(official, isDemo, { kind: 'admin' }) && <NavLink to={PATHS.admin} className={tab}>{t('wsAdmin', 'State admin')}</NavLink>}
+          {NODAL_DISTRICTS.filter((d) => canOpen(official, isDemo, { kind: 'nodal', slug: d.slug })).map((d) => (
             <NavLink key={d.slug} to={PATHS.nodal(d.slug)} className={tab}>
               {t('wsNodal', 'Nodal')} · {d.name.split(' ')[0]}
             </NavLink>
           ))}
-          <NavLink to={PATHS.inspector} className={tab}>{t('wsInspector', 'Inspector')}</NavLink>
-          <NavLink to={PATHS.engineer} className={tab}>{t('wsEngineer', 'Engineer')}</NavLink>
+          {canOpen(official, isDemo, { kind: 'inspector' }) && <NavLink to={PATHS.inspector} className={tab}>{t('wsInspector', 'Inspector')}</NavLink>}
+          {canOpen(official, isDemo, { kind: 'engineer' }) && <NavLink to={PATHS.engineer} className={tab}>{t('wsEngineer', 'Engineer')}</NavLink>}
+          {official && (
+            <button onClick={signOutOfficial} className="ml-2 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-red-600 inline-flex items-center gap-1" title={official.email}>
+              <LogOut className="w-3.5 h-3.5" aria-hidden />
+              <span>{t('signOut', 'Sign out')}</span>
+            </button>
+          )}
         </nav>
       </div>
       <Outlet />

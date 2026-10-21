@@ -1,9 +1,10 @@
 import React, { Suspense } from 'react';
 import { Link, Outlet, ScrollRestoration, useLocation, useNavigate } from 'react-router';
-import { Droplets } from 'lucide-react';
+import { Droplets, FlaskConical, AlertTriangle, X } from 'lucide-react';
 import { NirikshanHeader } from '../components/NirikshanHeader';
 import { NirikshanSlideDrawer } from '../components/NirikshanSlideDrawer';
 import { OtpLoginModal } from '../components/OtpLoginModal';
+import { CitizenSignInModal } from '../components/CitizenSignInModal';
 import { PortalNav } from '../components/PortalNav';
 import { useAppState } from '../state/AppStateContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -42,6 +43,22 @@ export default function AppShell() {
         onOpenDrawer={app.openDrawer}
       />
       <PortalNav />
+
+      {app.isDemo && (
+        <div className="bg-amber-50 border-b border-amber-200 text-amber-900 text-[11px] sm:text-xs">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 py-1.5 flex items-center gap-2">
+            <FlaskConical className="w-3.5 h-3.5 shrink-0" aria-hidden />
+            <span>{t('demoBanner', 'Demo mode: sample data, simulated sign-in. Complaints are saved only in this browser.')}</span>
+          </div>
+        </div>
+      )}
+      {app.syncError && (
+        <div role="alert" className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[70] max-w-md w-[92%] bg-red-600 text-white text-sm rounded-2xl shadow-xl p-3 flex items-start gap-2">
+          <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" aria-hidden />
+          <span className="flex-1">{app.syncError}</span>
+          <button onClick={app.clearSyncError} aria-label="Dismiss"><X className="w-4 h-4" /></button>
+        </div>
+      )}
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 py-5 space-y-6">
         <Suspense fallback={<PageFallback />}>
@@ -96,7 +113,11 @@ export default function AppShell() {
         onOpenLogin={app.openOtpModal}
       />
 
-      <OtpLoginModal isOpen={app.isOtpModalOpen} onClose={app.closeOtpModal} onLoginSuccess={app.login} />
+      {app.isDemo ? (
+        <OtpLoginModal isOpen={app.isOtpModalOpen} onClose={app.closeOtpModal} onLoginSuccess={app.login} />
+      ) : (
+        <CitizenSignInModal isOpen={app.isOtpModalOpen} onClose={app.closeOtpModal} onLoginSuccess={app.login} />
+      )}
     </div>
   );
 }

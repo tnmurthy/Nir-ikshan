@@ -1378,6 +1378,9 @@ export default async function handler(req, res) {
       return {
         ...rec,
         currentLiveStorage_MCM: mcm || rec.currentLiveStorage_MCM,
+        // Only a successful India-WRIS response is "live". Registry/fallback values are reference baselines.
+        isLiveVerified: isLiveWris && rec.isLiveVerified !== false,
+        dataQuality: isLiveWris ? 'live' : 'baseline',
       };
     });
 
@@ -1397,7 +1400,8 @@ export default async function handler(req, res) {
       agency: successfulAgency,
       date: endDate,
       recordsCount: records.length,
-      isLiveVerified: isLiveWris || Boolean(records[0]?.isLiveVerified),
+      isLiveVerified: isLiveWris,
+      dataQuality: isLiveWris ? 'live' : 'baseline',
       verificationSource: isLiveWris ? 'India-WRIS Live CWC/IMD API' : fallbackVerificationSource,
       data: records,
       records,
